@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>BridgeStory AI - 家庭與親子心聲繪本與漫畫工坊</title>
+  
+  <!-- Tailwind CSS & Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Google Identity Services SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              cream: '#FFFDF9',
+              peach: '#FEEFE8',
+              orange: '#F48C6B',
+              coral: '#E76F51',
+              sage: '#8AB19B',
+              clay: '#4A3E3D',
+              surface: '#FAF6F0'
+            }
+          },
+          fontFamily: {
+            sans: ['"Zen Maru Gothic"', '"Plus Jakarta Sans"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #FAF6F0;
+      color: #4A3E3D;
+      -webkit-tap-highlight-color: transparent;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background-color: #E2D7CC;
+      border-radius: 9999px;
+    }
+    /* 漫畫氣泡風格 */
+    .comic-bubble {
+      position: relative;
+      background: #FFFFFF;
+      border: 2px solid #4A3E3D;
+      border-radius: 16px;
+    }
+    .comic-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 24px;
+      border-width: 10px 10px 0;
+      border-style: solid;
+      border-color: #FFFFFF transparent;
+      display: block;
+      width: 0;
+    }
+    .comic-bubble::before {
+      content: '';
+      position: absolute;
+      bottom: -13px;
+      left: 22px;
+      border-width: 12px 12px 0;
+      border-style: solid;
+      border-color: #4A3E3D transparent;
+      display: block;
+      width: 0;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-brand-orange/20 selection:text-brand-clay pb-24 md:pb-12">
+
+  <!-- ==================== 頂部導航列 ==================== -->
+  <header class="sticky top-0 z-40 bg-brand-surface/90 backdrop-blur-md border-b border-brand-orange/15 px-4 py-3 sm:px-6">
+    <div class="max-w-5xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-brand-orange to-brand-peach flex items-center justify-center text-white shadow-sm">
+          <i data-lucide="book-heart" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <span class="text-lg font-bold tracking-tight text-brand-clay block leading-tight">BridgeStory <span class="text-brand-coral">AI</span></span>
+          <span class="text-[10px] text-brand-clay/60 block -mt-0.5">專為親子與家庭溝通設計</span>
+        </div>
+      </div>
+
+      <!-- 右側用戶登入狀態區塊 -->
+      <div id="authStatusContainer" class="flex items-center gap-2">
+        <button id="headerLoginBtn" onclick="triggerGoogleLoginPrompt()" class="text-xs sm:text-sm font-semibold bg-white px-3 py-1.5 rounded-full border border-brand-orange/30 text-brand-clay shadow-sm hover:bg-brand-peach/50 transition">
+          <span class="flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.16 0 9.98 0 12c0 2.02.45 3.84 1.25 5.42l4.03-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
+            登入 Google
+          </span>
+        </button>
+
+        <div id="userProfile" class="hidden items-center gap-2 bg-white/80 border border-brand-orange/20 rounded-full py-1 px-2.5 shadow-sm">
+          <img id="userAvatar" src="" alt="Avatar" class="w-6 h-6 rounded-full border border-brand-orange/30">
+          <span id="userName" class="text-xs font-semibold text-brand-clay max-w-[90px] sm:max-w-[120px] truncate">用戶</span>
+          <button onclick="handleLogout()" title="登出" class="text-brand-clay/50 hover:text-brand-coral p-1">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== 登入鎖定遮罩 (Auth Gate) ==================== -->
+  <div id="authGateModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-clay/40 backdrop-blur-md transition-opacity duration-300">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-brand-orange/20 text-center relative overflow-hidden">
+      <div class="w-16 h-16 mx-auto mb-4 bg-brand-peach/80 rounded-2xl flex items-center justify-center shadow-inner">
+        <i data-lucide="lock-keyhole" class="w-8 h-8 text-brand-coral"></i>
+      </div>
+      
+      <h2 class="text-xl sm:text-2xl font-bold text-brand-clay mb-2">登入以解鎖 BridgeStory AI</h2>
+      <p class="text-xs sm:text-sm text-brand-clay/70 mb-6 leading-relaxed">
+        妥善保存您的繪本與多格漫畫創作，守護家庭心聲對話隱私。
+      </p>
+
+      <div class="flex justify-center mb-4 min-h-[44px]">
+        <div id="googleBtnContainer"></div>
+      </div>
+
+      <div class="relative flex py-2 items-center">
+        <div class="flex-grow border-t border-brand-orange/20"></div>
+        <span class="flex-shrink mx-3 text-[11px] text-brand-clay/50">快速測試</span>
+        <div class="flex-grow border-t border-brand-orange/20"></div>
+      </div>
+
+      <button onclick="handleDemoLogin()" class="w-full py-2.5 px-4 mt-2 rounded-xl text-xs sm:text-sm font-medium text-brand-clay/80 bg-brand-surface hover:bg-brand-peach/40 border border-brand-orange/20 transition flex items-center justify-center gap-2">
+        <i data-lucide="sparkles" class="w-4 h-4 text-brand-orange"></i>
+        以訪客身份直接體驗
+      </button>
+
+      <p class="mt-4 text-[10px] text-brand-clay/50 flex items-center justify-center gap-1">
+        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-brand-sage"></i>
+        嚴格遵守隱私保護協議，未授權絕不公開分享
+      </p>
+    </div>
+  </div>
+
+  <!-- ==================== 主要應用主體 ==================== -->
+  <main class="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 space-y-6">
+    
+    <!-- 歡迎提示橫幅與模式切換鍵 -->
+    <section class="bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-brand-orange/15 relative overflow-hidden">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+        <div>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-peach text-brand-coral mb-2">
+            <i data-lucide="heart" class="w-3.5 h-3.5"></i> 心聲轉化繪本與漫畫
+          </span>
+          <h1 class="text-xl sm:text-2xl font-bold text-brand-clay">將日常說不出口的話，變成溫柔故事</h1>
+          <p class="text-xs sm:text-sm text-brand-clay/70 mt-1">
+            透過「引導式問答」或「自由傾訴」，AI 即時生成 5~10 幕繪本或連貫多格漫畫。
+          </p>
+        </div>
+        <div class="flex items-center gap-2 self-start sm:self-auto bg-brand-surface p-1 rounded-2xl border border-brand-orange/20">
+          <button onclick="switchInputMode('guided')" id="tabGuided" class="px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm bg-brand-coral text-white flex items-center gap-1.5">
+            <i data-lucide="list-checks" class="w-3.5 h-3.5"></i> 引導式問答
+          </button>
+          <button onclick="switchInputMode('free')" id="tabFree" class="px-4 py-2 rounded-xl text-xs font-bold transition text-brand-clay/70 hover:bg-white flex items-center gap-1.5">
+            <i data-lucide="feather" class="w-3.5 h-3.5"></i> 自由傾訴
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 模式 A：引導式問答模組 ==================== -->
+    <div id="guidedFormContainer" class="space-y-6">
+      <!-- 模組一：對象與心聲大綱 -->
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-brand-orange/15 shadow-sm">
+        <label class="block text-sm font-bold text-brand-clay mb-1.5 flex items-center justify-between">
+          <span>1. 溝通對象與心聲大綱 <span class="text-brand-coral">*</span></span>
+          <span class="text-[11px] font-normal text-brand-clay/60">你想對誰說？大綱是什麼？</span>
+        </label>
+        <textarea id="q1" rows="2" placeholder="例：想對叛逆期的兒子說，即使我們常因為成績吵架，爸爸依然隨時準備好給你一個擁抱..." class="w-full text-sm p-3 rounded-xl border border-brand-orange/20 focus:outline-none focus:ring-2 focus:ring-brand-coral/40 resize-none"></textarea>
+        <div class="flex flex-wrap gap-1.5 mt-2">
+          <button onclick="fillPrompt('q1', '想對叛逆期的孩子說，即使平時互不退讓，我依然永遠愛你支持你')" class="text-[11px] bg-brand-surface hover:bg-brand-peach/60 px-2.5 py-1 rounded-lg text-brand-clay/80 transition">🏷️ 叛逆期溝通</button>
+          <button onclick="fillPrompt('q1', '想跟剛上幼稚園的小朋友說，短暫的分開是為了讓我們學會獨立冒險')" class="text-[11px] bg-brand-surface hover:bg-brand-peach/60 px-2.5 py-1 rounded-lg text-brand-clay/80 transition">🏷️ 幼稚園分離焦慮</button>
+          <button onclick="fillPrompt('q1', '父母平時難以啟齒的道歉：上次在餐桌上大聲責備你，爸爸媽媽很抱歉')" class="text-[11px] bg-brand-surface hover:bg-brand-peach/60 px-2.5 py-1 rounded-lg text-brand-clay/80 transition">🏷️ 父母真誠道歉</button>
+        </div>
+      </div>
+
+      <!-- 模組二：主要隱喻與象徵世界 -->
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-brand-orange/15 shadow-sm">
+        <label class="block text-sm font-bold text-brand-clay mb-1.5 flex items-center justify-between">
+          <span>2. 主要隱喻與象徵世界</span>
+          <span class="text-[11px] font-normal text-brand-clay/60">用什麼轉化現實？</span>
+        </label>
+        <input id="q2" type="text" placeholder="例：築起尖刺防禦的小刺蝟、或是齒輪卡住的機器人家屋..." class="w-full text-sm p-3 rounded-xl border border-brand-orange/20 focus:outline-none focus:ring-2 focus:ring-brand-coral/40">
+        <div class="flex flex-wrap gap-1.5 mt-2">
+          <button onclick="fillPrompt('q2', '滿身尖刺但渴望擁抱的小刺蝟')" class="text-[11px] bg-brand-surface hover:bg-brand-peach/60 px-2.5 py-1 rounded-lg text-brand-clay/80 transition">🏷️ 渴望擁抱的刺蝟</button>
+          <button onclick="fillPrompt('q2', '齒輪暫時卡住的機器人父子')" class="text-[11px] bg-brand-surface hover:bg-brand-peach/60 px-2.5 py-1 rounded-lg text-brand-clay/80 transition">🏷️ 齒輪機器人</button>
+          <button onclick="fillPrompt('q2', '迷路但在黑夜學會看星光的小熊')" class="text-[11px] bg-brand-surface hover:bg-brand-peach/60 px-2.5 py-1 rounded-lg text-brand-clay/80 transition">🏷️ 星光小熊</button>
+        </div>
+      </div>
+
+      <!-- 模組三：情緒基調 & 模組四：期望結局 (附3個參考答案) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-brand-orange/15 shadow-sm">
+          <label class="block text-sm font-bold text-brand-clay mb-1.5">3. 情緒基調</label>
+          <select id="q3" class="w-full text-sm p-3 rounded-xl border border-brand-orange/20 focus:outline-none focus:ring-2 focus:ring-brand-coral/40 bg-white">
+            <option value="溫暖包容與擁抱">溫暖包容與擁抱</option>
+            <option value="輕鬆幽默與破冰自嘲">輕鬆幽默與破冰自嘲</option>
+            <option value="深刻理解與彼此釋懷">深刻理解與彼此釋懷</option>
+            <option value="勇敢冒險與共同成長">勇敢冒險與共同成長</option>
+          </select>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-brand-orange/15 shadow-sm">
+          <label class="block text-sm font-bold text-brand-clay mb-1.5 flex items-center justify-between">
+            <span>4. 期望結局</span>
+            <span class="text-[11px] font-normal text-brand-clay/60">期盼帶來怎樣的化解？</span>
+          </label>
+          <input id="q4" type="text" placeholder="例：兩人坐下來好好吃晚餐、彼此真誠擁抱..." class="w-full text-sm p-3 rounded-xl border border-brand-orange/20 focus:outline-none focus:ring-2 focus:ring-brand-coral/40">
+          <div class="flex flex-wrap gap-1.5 mt-2">
+            <button type="button" onclick="fillPrompt('q4', '彼此坐下來好好吃一頓晚餐，開啟無負擔的溫和對話')" class="text-[11px] bg-brand-surface hover:bg-brand-peach/60 px-2.5 py-1 rounded-lg text-brand-clay/80 transition">
+              🏷️ 好好吃頓晚餐對話
+            </button>
+            <button type="button" onclick="fillPrompt('q4', '放下防備給予真誠擁抱，達成睡前 3 分鐘聆聽約定')" class="text-[11px] bg-brand-surface hover:bg-brand-peach/60 px-2.5 py-1 rounded-lg text-brand-clay/80 transition">
+              🏷️ 擁抱與睡前約定
+            </button>
+            <button type="button" onclick="fillPrompt('q4', '孩子明白「父母並不完美但永遠愛你」，彼此釋懷微笑')" class="text-[11px] bg-brand-surface hover:bg-brand-peach/60 px-2.5 py-1 rounded-lg text-brand-clay/80 transition">
+              🏷️ 明白父母的愛並釋懷
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 模式 B：自由傾訴畫布模組 ==================== -->
+    <div id="freeFormContainer" class="hidden space-y-6">
+      <div class="flex items-center justify-between bg-brand-peach/60 border border-brand-coral/20 px-4 py-3 rounded-2xl">
+        <span class="text-xs text-brand-clay flex items-center gap-1.5">
+          <i data-lucide="sparkles" class="w-4 h-4 text-brand-coral"></i>
+          不需要有壓力，按照您的心情自由書寫，AI 會幫您轉化為分鏡故事或多格漫畫
+        </span>
+        <button onclick="fillFreeSample()" class="text-xs font-bold text-brand-coral hover:underline shrink-0 ml-2">
+          帶入示範內容
+        </button>
+      </div>
+
+      <!-- 區塊一：心聲與故事大綱 -->
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-brand-orange/15 shadow-sm">
+        <label class="block text-sm font-bold text-brand-clay mb-1.5 flex items-center justify-between">
+          <span class="flex items-center gap-1.5">
+            <i data-lucide="message-square-quote" class="w-4 h-4 text-brand-coral"></i>
+            1. 心聲大綱 (想說的心裡話) <span class="text-brand-coral">*</span>
+          </span>
+          <span class="text-[11px] text-brand-clay/60 font-normal">背景與對象</span>
+        </label>
+        <textarea id="free_outline" rows="3" placeholder="請自由傾訴這段心聲的背景……例如：想對快升中學的兒子說的話。最近因為他打遊戲常起爭執，雙方一開口就劍拔弩張，但其實我只是擔心他睡眠不足..." class="w-full text-sm p-3 rounded-xl border border-brand-orange/20 focus:outline-none focus:ring-2 focus:ring-brand-coral/40 resize-none"></textarea>
+      </div>
+
+      <!-- 區塊二：故事過程與衝突轉折 -->
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-brand-orange/15 shadow-sm">
+        <label class="block text-sm font-bold text-brand-clay mb-1.5 flex items-center justify-between">
+          <span class="flex items-center gap-1.5">
+            <i data-lucide="git-branch" class="w-4 h-4 text-brand-orange"></i>
+            2. 故事過程與轉折 (日常情境或摩擦)
+          </span>
+          <span class="text-[11px] text-brand-clay/60 font-normal">起伏情節</span>
+        </label>
+        <textarea id="free_process" rows="3" placeholder="描述你們常發生的情境或互動轉折……例如：他在房間摔門戴上耳機，媽媽在門外握著熱牛奶不知所措；兩個人都想靠近彼此，卻不知不覺用冷漠來保護自己..." class="w-full text-sm p-3 rounded-xl border border-brand-orange/20 focus:outline-none focus:ring-2 focus:ring-brand-coral/40 resize-none"></textarea>
+      </div>
+
+      <!-- 區塊三：期望的收尾與化解結局 -->
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-brand-orange/15 shadow-sm">
+        <label class="block text-sm font-bold text-brand-clay mb-1.5 flex items-center justify-between">
+          <span class="flex items-center gap-1.5">
+            <i data-lucide="heart-handshake" class="w-4 h-4 text-brand-sage"></i>
+            3. 期望結局 (破冰與理解)
+          </span>
+          <span class="text-[11px] text-brand-clay/60 font-normal">化解與約定</span>
+        </label>
+        <input id="free_ending" type="text" placeholder="例如：放下手機與門後的防備，安靜地坐在沙發上吃消夜，達成「每天睡前聊天五分鐘」的小約定..." class="w-full text-sm p-3 rounded-xl border border-brand-orange/20 focus:outline-none focus:ring-2 focus:ring-brand-coral/40">
+      </div>
+
+      <!-- 區塊四：表達事物與隱喻象徵 -->
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-brand-orange/15 shadow-sm">
+        <label class="block text-sm font-bold text-brand-clay mb-1.5 flex items-center justify-between">
+          <span class="flex items-center gap-1.5">
+            <i data-lucide="palette" class="w-4 h-4 text-brand-coral"></i>
+            4. 想表達的事物、象徵或隱喻世界
+          </span>
+          <span class="text-[11px] text-brand-clay/60 font-normal">象徵轉化</span>
+        </label>
+        <input id="free_metaphor" type="text" placeholder="例如：刺蝟與暖爐、暫時脫軌的星空小火車、齒輪卡住的機器人..." class="w-full text-sm p-3 rounded-xl border border-brand-orange/20 focus:outline-none focus:ring-2 focus:ring-brand-coral/40">
+        
+        <div class="flex flex-wrap gap-1.5 mt-2.5">
+          <span class="text-[11px] text-brand-clay/50 self-center mr-1">熱門象徵：</span>
+          <button type="button" onclick="fillPrompt('free_metaphor', '外表尖銳但內心渴望擁抱的小刺蝟')" class="text-[11px] bg-brand-surface hover:bg-brand-peach/60 px-2 py-1 rounded-lg text-brand-clay/80 transition">🦔 溫柔小刺蝟</button>
+          <button type="button" onclick="fillPrompt('free_metaphor', '在黑暗森林中學會彼此辨識星光的旅人')" class="text-[11px] bg-brand-surface hover:bg-brand-peach/60 px-2 py-1 rounded-lg text-brand-clay/80 transition">✨ 辨識星光</button>
+          <button type="button" onclick="fillPrompt('free_metaphor', '齒輪生鏽卡住但仍在努力運轉的機器人')" class="text-[11px] bg-brand-surface hover:bg-brand-peach/60 px-2 py-1 rounded-lg text-brand-clay/80 transition">🤖 努力運轉的機器人</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 媒材與篇幅 (兩模式共用) ==================== -->
+    <div id="mediaOptionsContainer" class="bg-white rounded-2xl p-4 sm:p-5 border border-brand-orange/15 shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <label class="block text-sm font-bold text-brand-clay mb-1">5. 媒材呈現風格</label>
+          <div class="flex flex-wrap gap-2 mt-1.5">
+            <label class="inline-flex items-center gap-1.5 text-xs bg-brand-surface px-3 py-1.5 rounded-xl border border-brand-orange/20 cursor-pointer">
+              <input type="radio" name="mediaStyle" value="comic" checked class="text-brand-coral focus:ring-brand-coral"> 
+              <span class="font-bold text-brand-coral">💥 多格連貫漫畫</span>
+            </label>
+            <label class="inline-flex items-center gap-1.5 text-xs bg-brand-surface px-3 py-1.5 rounded-xl border border-brand-orange/20 cursor-pointer">
+              <input type="radio" name="mediaStyle" value="picturebook" class="text-brand-coral focus:ring-brand-coral"> 
+              繪本微電影
+            </label>
+            <label class="inline-flex items-center gap-1.5 text-xs bg-brand-surface px-3 py-1.5 rounded-xl border border-brand-orange/20 cursor-pointer">
+              <input type="radio" name="mediaStyle" value="animation" class="text-brand-coral focus:ring-brand-coral"> 
+              2D扁平動畫
+            </label>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-bold text-brand-clay mb-1">故事分鏡篇幅: <span id="sceneCountText" class="text-brand-coral font-bold">5 格 / 幕</span></label>
+          <input id="sceneSlider" type="range" min="5" max="10" value="5" oninput="document.getElementById('sceneCountText').innerText = this.value + ' 格 / 幕'" class="w-full accent-brand-coral">
+        </div>
+      </div>
+    </div>
+
+    <!-- 生成按鈕 (兩模式通用) -->
+    <div id="actionBtnContainer" class="text-center pt-2">
+      <button id="generateBtn" onclick="generateStoryFlow()" class="w-full sm:w-auto px-10 py-3.5 bg-gradient-to-r from-brand-orange to-brand-coral text-white font-bold rounded-2xl shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] transition flex items-center justify-center gap-2 mx-auto">
+        <i data-lucide="wand-2" class="w-5 h-5"></i>
+        開始生成心聲創作初稿
+      </button>
+    </div>
+
+    <!-- ==================== 繪本 / 漫畫成果展示區 ==================== -->
+    <div id="storyResultContainer" class="hidden space-y-6">
+      
+      <!-- 頂部資訊與控制列 -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-brand-orange/20 pb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="badgeMediaType" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-brand-orange/20 text-brand-coral">多格漫畫</span>
+            <h2 id="storyTitle" class="text-lg sm:text-xl font-bold text-brand-clay">小刺蝟的柔軟心聲</h2>
+          </div>
+          <span id="storyMeta" class="text-xs text-brand-clay/60 block mt-0.5">共 5 格 · 家庭溝通漫畫分鏡</span>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <!-- 漫畫專屬：切換「全格滾動」與「單格放大」 -->
+          <button id="comicViewToggleBtn" onclick="toggleComicViewMode()" class="px-3 py-1.5 rounded-xl bg-brand-surface border border-brand-orange/20 text-xs font-semibold text-brand-clay flex items-center gap-1 hover:bg-brand-peach/40">
+            <i data-lucide="layout-grid" class="w-4 h-4 text-brand-coral"></i>
+            <span id="comicViewText">切換單格放映</span>
+          </button>
+          <button onclick="readAloudCurrentScene()" class="px-3 py-1.5 rounded-xl bg-white border border-brand-orange/20 text-xs font-semibold text-brand-clay flex items-center gap-1 hover:bg-brand-peach/40">
+            <i data-lucide="volume-2" class="w-4 h-4 text-brand-orange"></i> 朗讀心聲
+          </button>
+          <button onclick="resetStory()" class="px-3 py-1.5 rounded-xl bg-white border border-brand-orange/20 text-xs font-semibold text-brand-clay/70 hover:text-brand-coral">
+            重寫心聲
+          </button>
+        </div>
+      </div>
+
+      <!-- ==================== 多格漫畫：全篇多格滾動檢視模式 ==================== -->
+      <div id="comicGridContainer" class="space-y-6">
+        <div id="comicGridPanels" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <!-- 動態注入多格漫畫 Panels -->
+        </div>
+      </div>
+
+      <!-- ==================== 繪本 / 單格放映模式 ==================== -->
+      <div id="storyCard" class="hidden bg-white rounded-3xl p-6 sm:p-8 border border-brand-orange/15 shadow-md flex-col items-center select-none touch-pan-y">
+        <!-- 動態插圖呈現 -->
+        <div id="sceneIllustration" class="w-full max-w-xs sm:max-w-sm aspect-square bg-brand-surface rounded-2xl flex items-center justify-center p-4 border border-brand-orange/10 mb-6 transition-all duration-300">
+          <!-- 動態注入 SVG -->
+        </div>
+
+        <!-- 旁白與引導對白 -->
+        <div class="max-w-xl text-center space-y-4">
+          <span id="sceneStepBadge" class="text-xs font-bold text-brand-coral bg-brand-peach px-3 py-1 rounded-full">第 1 格 / 共 5 格</span>
+          <p id="sceneNarrative" class="text-sm sm:text-base text-brand-clay font-medium leading-relaxed"></p>
+          
+          <div class="bg-brand-surface p-3.5 rounded-2xl border border-brand-orange/15 text-xs text-left">
+            <p class="font-bold text-brand-clay mb-1 flex items-center gap-1.5">
+              <i data-lucide="message-circle-heart" class="w-3.5 h-3.5 text-brand-coral"></i> 親子共讀對話啟發
+            </p>
+            <p id="sceneDialogue" class="text-brand-clay/80 italic"></p>
+          </div>
+        </div>
+
+        <!-- 翻頁控制 -->
+        <div class="flex items-center gap-4 mt-6">
+          <button onclick="prevScene()" id="prevBtn" class="px-4 py-2 rounded-xl bg-brand-surface border border-brand-orange/20 text-xs font-bold text-brand-clay disabled:opacity-40">上一格</button>
+          <span id="pageIndicator" class="text-xs font-bold text-brand-clay/60">1 / 5</span>
+          <button onclick="nextScene()" id="nextBtn" class="px-4 py-2 rounded-xl bg-brand-coral text-white text-xs font-bold shadow-md hover:bg-brand-orange transition">下一格</button>
+        </div>
+      </div>
+
+      <!-- ==================== 升級版分享心聲模組 (支援此幕 / 全篇) ==================== -->
+      <div class="bg-white rounded-3xl p-5 sm:p-6 border border-brand-orange/15 shadow-sm space-y-4">
+        
+        <!-- 分享範圍選擇器 -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-brand-orange/15">
+          <div class="flex items-center gap-2">
+            <i data-lucide="share-2" class="w-4 h-4 text-brand-coral"></i>
+            <span class="text-xs sm:text-sm font-bold text-brand-clay">選擇分享心聲範圍：</span>
+          </div>
+
+          <div class="flex items-center bg-brand-surface p-1 rounded-xl border border-brand-orange/20 self-start sm:self-auto">
+            <label class="cursor-pointer px-3 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 has-[:checked]:bg-brand-coral has-[:checked]:text-white text-brand-clay/70">
+              <input type="radio" name="shareScope" value="single" checked class="hidden" onchange="updateSharePreview()">
+              <span>📍 分享此幕心聲</span>
+            </label>
+            <label class="cursor-pointer px-3 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 has-[:checked]:bg-brand-coral has-[:checked]:text-white text-brand-clay/70">
+              <input type="radio" name="shareScope" value="full" class="hidden" onchange="updateSharePreview()">
+              <span>📖 分享完整故事</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 分享管道按鈕組 (WhatsApp, LINE, 原生分享, 複製) -->
+        <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
+          <!-- WhatsApp 分享 -->
+          <button onclick="shareToWhatsApp()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#25D366]/10 text-[#128C7E] hover:bg-[#25D366]/20 border border-[#25D366]/30 text-xs font-bold transition">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/>
+            </svg>
+            分享至 WhatsApp
+          </button>
+
+          <!-- LINE 分享 -->
+          <button onclick="shareToLine()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#06C755]/10 text-[#06C755] hover:bg-[#06C755]/20 border border-[#06C755]/30 text-xs font-bold transition">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.085.495.235l2.467 3.348V8.108c0-.345.281-.63.629-.63.346 0 .626.285.626.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/>
+            </svg>
+            分享至 LINE
+          </button>
+
+          <!-- 手機原生分享面板 -->
+          <button onclick="shareViaWebShare()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-surface text-brand-clay hover:bg-brand-peach/50 border border-brand-orange/20 text-xs font-bold transition">
+            <i data-lucide="share" class="w-4 h-4 text-brand-coral"></i>
+            原生分享
+          </button>
+
+          <!-- 一鍵複製文字卡片 -->
+          <button onclick="copyShareText()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white text-brand-clay hover:bg-brand-peach/40 border border-brand-orange/20 text-xs font-semibold transition ml-auto">
+            <i data-lucide="copy" class="w-4 h-4 text-brand-orange"></i>
+            複製心聲文字
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ==================== JavaScript 邏輯腳本 ==================== -->
+  <script>
+    const GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
+
+    let currentUser = null;
+    let currentStoryData = [];
+    let currentSceneIndex = 0;
+    let currentMode = 'guided'; // 'guided' | 'free'
+    let selectedMediaType = 'comic'; // 'comic' | 'picturebook' | 'animation'
+    let isComicGridView = true; // 多格漫畫檢視切換狀態
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      checkLocalAuth();
+      initGoogleSignIn();
+      initTouchGestures();
+    });
+
+    function checkLocalAuth() {
+      const savedUser = localStorage.getItem('bridge_user');
+      if (savedUser) {
+        try {
+          currentUser = JSON.parse(savedUser);
+          applyLoggedInUI(currentUser);
+        } catch (e) {
+          localStorage.removeItem('bridge_user');
+        }
+      }
+    }
+
+    function initGoogleSignIn() {
+      if (typeof google === 'undefined') {
+        setTimeout(initGoogleSignIn, 300);
+        return;
+      }
+
+      try {
+        google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleCredentialResponse,
+          auto_select: false,
+          cancel_on_tap_outside: false
+        });
+
+        google.accounts.id.renderButton(
+          document.getElementById("googleBtnContainer"),
+          { 
+            theme: "outline", 
+            size: "large", 
+            shape: "pill",
+            text: "signin_with",
+            locale: "zh-HK",
+            width: 260
+          }
+        );
+      } catch (err) {
+        console.warn("Google SDK 初始化：", err);
+      }
+    }
+
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function handleGoogleCredentialResponse(response) {
+      const payload = parseJwt(response.credential);
+      if (payload) {
+        const user = {
+          name: payload.name || "家長夥伴",
+          email: payload.email,
+          avatar: payload.picture || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80"
+        };
+        saveAndSetUser(user);
+      }
+    }
+
+    function handleDemoLogin() {
+      const demoUser = {
+        name: "訪客體驗家長",
+        email: "guest@bridgestory.ai",
+        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80"
+      };
+      saveAndSetUser(demoUser);
+    }
+
+    function saveAndSetUser(user) {
+      currentUser = user;
+      localStorage.setItem('bridge_user', JSON.stringify(user));
+      applyLoggedInUI(user);
+    }
+
+    function applyLoggedInUI(user) {
+      const modal = document.getElementById('authGateModal');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      setTimeout(() => modal.classList.add('hidden'), 300);
+
+      document.getElementById('headerLoginBtn').classList.add('hidden');
+      const userProfile = document.getElementById('userProfile');
+      userProfile.classList.remove('hidden');
+      userProfile.classList.add('flex');
+      document.getElementById('userName').innerText = user.name;
+      document.getElementById('userAvatar').src = user.avatar;
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      localStorage.removeItem('bridge_user');
+      
+      if (typeof google !== 'undefined' && google.accounts.id) {
+        google.accounts.id.disableAutoSelect();
+      }
+
+      document.getElementById('userProfile').classList.add('hidden');
+      document.getElementById('userProfile').classList.remove('flex');
+      document.getElementById('headerLoginBtn').classList.remove('hidden');
+
+      const modal = document.getElementById('authGateModal');
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+      }, 10);
+    }
+
+    function triggerGoogleLoginPrompt() {
+      document.getElementById('authGateModal').classList.remove('hidden');
+      setTimeout(() => {
+        document.getElementById('authGateModal').classList.remove('opacity-0', 'pointer-events-none');
+      }, 10);
+    }
+
+    function fillPrompt(elementId, text) {
+      document.getElementById(elementId).value = text;
+    }
+
+    function switchInputMode(mode) {
+      currentMode = mode;
+      const tabGuided = document.getElementById('tabGuided');
+      const tabFree = document.getElementById('tabFree');
+      const guidedForm = document.getElementById('guidedFormContainer');
+      const freeForm = document.getElementById('freeFormContainer');
+
+      if (mode === 'guided') {
+        tabGuided.className = "px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm bg-brand-coral text-white flex items-center gap-1.5";
+        tabFree.className = "px-4 py-2 rounded-xl text-xs font-bold transition text-brand-clay/70 hover:bg-white flex items-center gap-1.5";
+        guidedForm.classList.remove('hidden');
+        freeForm.classList.add('hidden');
+      } else {
+        tabFree.className = "px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm bg-brand-coral text-white flex items-center gap-1.5";
+        tabGuided.className = "px-4 py-2 rounded-xl text-xs font-bold transition text-brand-clay/70 hover:bg-white flex items-center gap-1.5";
+        freeForm.classList.remove('hidden');
+        guidedForm.classList.add('hidden');
+      }
+      lucide.createIcons();
+    }
+
+    function fillFreeSample() {
+      document.getElementById('free_outline').value = "想對升中學的女兒說：看見妳最近常常為功課感到焦慮，爸爸媽媽並不是只在乎成績，而是心疼妳總是一個人把壓力藏在心裡。";
+      document.getElementById('free_process').value = "每天放學回家，我們一問起學校的事，妳總是默默走進房間關上門。餐桌上的氣氛變得很安靜，其實我們都在等一個打破沉默的機會。";
+      document.getElementById('free_ending').value = "端著一杯熱牛奶走進房間，相視一笑，約好每天睡前聊五分鐘真心話。";
+      document.getElementById('free_metaphor').value = "小刺蝟在寒冬中慢慢脫下尖銳的毛衣，靠近溫暖的壁爐。";
+    }
+
+    // 生成客製化漫畫插畫 SVG (依分鏡起承轉合設計)
+    function generateComicSvg(step, total, metaphor, emotion) {
+      // 根據分鏡位置渲染漫畫角色與場景 (小刺蝟與森林小屋)
+      if (step === 1) {
+        // 第一格：背對背或保持防禦
+        return `
+          <svg viewBox="0 0 200 160" class="w-full h-full">
+            <rect width="200" height="160" fill="#FFF9F5"/>
+            <circle cx="160" cy="40" r="22" fill="#FEEFE8"/>
+            <!-- 房間牆角 -->
+            <path d="M 0 130 L 200 130" stroke="#E2D7CC" stroke-width="2"/>
+            <!-- 背對的小刺蝟 -->
+            <path d="M 50 130 C 50 85, 90 85, 95 130 Z" fill="#F48C6B"/>
+            <path d="M 45 105 L 35 100 M 42 95 L 30 88 M 48 85 L 40 76 M 60 78 L 56 66 M 75 75 L 75 62" stroke="#4A3E3D" stroke-width="2.5" stroke-linecap="round"/>
+            <ellipse cx="85" cy="105" rx="3" ry="5" fill="#4A3E3D"/>
+            <!-- 遠處默默端著盤子的家長象徵 -->
+            <path d="M 140 130 C 140 95, 175 95, 175 130 Z" fill="#8AB19B" opacity="0.6"/>
+            <circle cx="157" cy="85" r="12" fill="#8AB19B" opacity="0.8"/>
+            <path d="M 130 115 L 148 115" stroke="#4A3E3D" stroke-width="2"/>
+          </svg>
+        `;
+      } else if (step === total) {
+        // 最終格：釋懷擁抱與溫暖長椅
+        return `
+          <svg viewBox="0 0 200 160" class="w-full h-full">
+            <rect width="200" height="160" fill="#FEEFE8"/>
+            <circle cx="100" cy="80" r="50" fill="#FFFDF9"/>
+            <!-- 溫暖愛心光暈 -->
+            <path d="M 100 45 C 90 35, 75 40, 75 55 C 75 72, 100 88, 100 88 C 100 88, 125 72, 125 55 C 125 40, 110 35, 100 45 Z" fill="#E76F51" opacity="0.25"/>
+            <!-- 依偎相擁的圓潤形象 -->
+            <ellipse cx="85" cy="115" rx="26" ry="24" fill="#F48C6B"/>
+            <ellipse cx="115" cy="110" rx="30" ry="28" fill="#8AB19B"/>
+            <ellipse cx="80" cy="108" rx="2.5" ry="3.5" fill="#4A3E3D"/>
+            <ellipse cx="118" cy="102" rx="2.5" ry="3.5" fill="#4A3E3D"/>
+            <path d="M 76 116 Q 82 120 88 116" stroke="#4A3E3D" stroke-width="2" fill="none"/>
+            <path d="M 114 110 Q 120 114 126 110" stroke="#4A3E3D" stroke-width="2" fill="none"/>
+            <!-- 柔和毛線圍巾串聯雙方 -->
+            <path d="M 70 120 C 85 132, 120 132, 135 120" stroke="#E76F51" stroke-width="6" stroke-linecap="round" fill="none"/>
+          </svg>
+        `;
+      } else {
+        // 中間格：轉折與試探性的對話
+        return `
+          <svg viewBox="0 0 200 160" class="w-full h-full">
+            <rect width="200" height="160" fill="#FAF6F0"/>
+            <!-- 象徵星光或微風 -->
+            <circle cx="40" cy="40" r="3" fill="#E76F51"/>
+            <circle cx="160" cy="50" r="4" fill="#8AB19B"/>
+            <path d="M 20 80 Q 100 60 180 80" stroke="#E2D7CC" stroke-width="1.5" stroke-dasharray="4 4" fill="none"/>
+            <!-- 兩隻小精靈/刺蝟轉身試探交流 -->
+            <ellipse cx="70" cy="115" rx="22" ry="20" fill="#F48C6B"/>
+            <ellipse cx="130" cy="115" rx="24" ry="22" fill="#8AB19B"/>
+            <ellipse cx="78" cy="112" rx="2" ry="3" fill="#4A3E3D"/>
+            <ellipse cx="122" cy="112" rx="2" ry="3" fill="#4A3E3D"/>
+            <!-- 中間飄著的熱氣或小茶杯 -->
+            <rect x="94" y="118" width="12" height="10" rx="3" fill="#FFF" stroke="#4A3E3D" stroke-width="1.5"/>
+            <path d="M 98 112 Q 100 106 102 112" stroke="#F48C6B" stroke-width="1.5" fill="none"/>
+          </svg>
+        `;
+      }
+    }
+
+    // 生成故事流程
+    function generateStoryFlow() {
+      if (!currentUser) {
+        triggerGoogleLoginPrompt();
+        return;
+      }
+
+      selectedMediaType = document.querySelector('input[name="mediaStyle"]:checked')?.value || 'comic';
+      const count = parseInt(document.getElementById('sceneSlider').value, 10);
+
+      let outline = "", process = "", ending = "", metaphor = "", emotion = "溫暖理解";
+
+      if (currentMode === 'guided') {
+        outline = document.getElementById('q1').value.trim();
+        metaphor = document.getElementById('q2').value.trim() || "小刺蝟與守護花園";
+        emotion = document.getElementById('q3').value;
+        ending = document.getElementById('q4').value.trim() || "放下防備坐下來好好吃晚餐，彼此相擁";
+
+        if (!outline) {
+          alert("請在第一模組填寫想對誰說或心聲大綱喔！");
+          return;
+        }
+      } else {
+        outline = document.getElementById('free_outline').value.trim();
+        process = document.getElementById('free_process').value.trim();
+        ending = document.getElementById('free_ending').value.trim() || "坐下來好好吃頓晚餐，聽對方說話";
+        metaphor = document.getElementById('free_metaphor').value.trim() || "刺蝟脫下防衛的毛衣";
+
+        if (!outline) {
+          alert("請在「心聲大綱」填寫想傳達的心裡話！");
+          return;
+        }
+      }
+
+      // 生成 5 至 10 幕連貫故事結構
+      currentStoryData = [];
+      for (let i = 1; i <= count; i++) {
+        let title = `第 ${i} 格 · `;
+        let narrative = "";
+        let dialogue = "";
+        let emotionTag = "";
+
+        if (i === 1) {
+          title += "【起】說不出口的心聲";
+          narrative = `房間的門輕輕掩上，這段一直想對你說的心聲在心底迴盪：「${outline.slice(0, 48)}...」。`;
+          dialogue = `「其實……我並不是冷漠，只是不知道該怎麼向你開口。」`;
+          emotionTag = "防備與試探";
+        } else if (i === count) {
+          title += "【合】融化心防的約定";
+          narrative = `當夕陽穿透窗戶灑在餐桌前，所有的生氣與不安終於悄悄放下。${ending}。`;
+          dialogue = `「我們打勾勾，以後不管發生什麼摩擦，都給彼此一個溫暖的擁抱。」`;
+          emotionTag = "釋懷與相擁";
+        } else if (i === 2) {
+          title += "【承】生活中的摩擦與日常";
+          narrative = process ? `正如日常中常發生的：「${process.slice(0, 36)}...」` : `如同這片「${metaphor}」的世界，彼此身上都帶著看似堅硬的刺。`;
+          dialogue = `「上次對你講話口氣太重，我看見你轉身難過，我也很自責。」`;
+          emotionTag = "日常轉折";
+        } else {
+          title += `【轉】傾聽與看見對方的光`;
+          narrative = `在沉澱後的微風裡，兩個人終於聽懂了那些藏在沉默背後的在乎與關愛。`;
+          dialogue = `「原來你一直在默默守護著我，只是我們表達愛的方式不一樣。」`;
+          emotionTag = emotion;
+        }
+
+        currentStoryData.push({
+          step: i,
+          total: count,
+          title: title,
+          narrative: narrative,
+          dialogue: dialogue,
+          emotionTag: emotionTag,
+          svgIllustration: generateComicSvg(i, count, metaphor, emotion)
+        });
+      }
+
+      currentSceneIndex = 0;
+      
+      // 更新標題與模式標籤
+      const mediaBadge = document.getElementById('badgeMediaType');
+      if (selectedMediaType === 'comic') {
+        mediaBadge.innerText = "💥 多格連貫漫畫";
+        mediaBadge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-brand-coral text-white";
+        document.getElementById('comicViewToggleBtn').classList.remove('hidden');
+        isComicGridView = true;
+      } else {
+        mediaBadge.innerText = selectedMediaType === 'picturebook' ? "📖 繪本微電影" : "🎨 2D扁平動畫";
+        mediaBadge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-brand-orange/20 text-brand-coral";
+        document.getElementById('comicViewToggleBtn').classList.add('hidden');
+        isComicGridView = false;
+      }
+
+      // 介面切換
+      document.getElementById('guidedFormContainer').classList.add('hidden');
+      document.getElementById('freeFormContainer').classList.add('hidden');
+      document.getElementById('mediaOptionsContainer').classList.add('hidden');
+      document.getElementById('actionBtnContainer').classList.add('hidden');
+      document.getElementById('storyResultContainer').classList.remove('hidden');
+
+      renderStoryView();
+    }
+
+    // 渲染故事成果（支援多格漫畫 Grid 與 單格放映 Card）
+    function renderStoryView() {
+      const comicGrid = document.getElementById('comicGridContainer');
+      const storyCard = document.getElementById('storyCard');
+      const toggleBtnText = document.getElementById('comicViewText');
+
+      if (selectedMediaType === 'comic' && isComicGridView) {
+        // 多格漫畫全景模式
+        comicGrid.classList.remove('hidden');
+        storyCard.classList.add('hidden');
+        storyCard.classList.remove('flex');
+        toggleBtnText.innerText = "切換單格放映";
+
+        renderComicGrid();
+      } else {
+        // 單頁放映模式 (繪本或單格漫畫)
+        comicGrid.classList.add('hidden');
+        storyCard.classList.remove('hidden');
+        storyCard.classList.add('flex');
+        toggleBtnText.innerText = "切換全格漫畫總覽";
+
+        renderSingleCard();
+      }
+      lucide.createIcons();
+    }
+
+    // 渲染多格漫畫網格
+    function renderComicGrid() {
+      const container = document.getElementById('comicGridPanels');
+      container.innerHTML = '';
+
+      currentStoryData.forEach((panel, idx) => {
+        const panelEl = document.createElement('div');
+        panelEl.className = "bg-white rounded-2xl border-2 border-brand-clay shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition";
+        panelEl.innerHTML = `
+          <!-- 漫畫分格頂部標題標籤 -->
+          <div class="bg-brand-surface border-b-2 border-brand-clay px-3.5 py-2 flex items-center justify-between">
+            <span class="text-xs font-bold text-brand-clay">${panel.title}</span>
+            <span class="text-[10px] font-bold text-brand-coral bg-brand-peach px-2 py-0.5 rounded-full">${panel.emotionTag}</span>
+          </div>
+
+          <!-- 漫畫插畫框 -->
+          <div class="p-3 bg-[#FAF6F0] flex items-center justify-center border-b border-brand-orange/20 min-h-[160px]">
+            ${panel.svgIllustration}
+          </div>
+
+          <!-- 漫畫對白氣泡與旁白框 -->
+          <div class="p-4 space-y-3 bg-white flex-1 flex flex-col justify-between">
+            <!-- 旁白 Narrative Box -->
+            <div class="bg-brand-peach/40 border border-brand-orange/20 rounded-xl p-2.5 text-xs text-brand-clay font-medium leading-relaxed">
+              <span class="font-bold text-brand-coral block mb-0.5">【心聲旁白】</span>
+              ${panel.narrative}
+            </div>
+
+            <!-- 漫畫對白氣泡 Speech Bubble -->
+            <div class="comic-bubble p-3 text-xs text-brand-clay shadow-sm">
+              <span class="font-bold text-brand-clay block mb-0.5 flex items-center gap-1">
+                <i data-lucide="message-circle" class="w-3.5 h-3.5 text-brand-coral"></i> 親子對白：
+              </span>
+              <p class="font-bold text-brand-coral text-xs leading-snug">${panel.dialogue}</p>
+            </div>
+
+            <!-- 單格朗讀與放大捷徑 -->
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-brand-orange/10">
+              <button onclick="readAloudSpecificScene(${idx})" class="text-[11px] font-semibold text-brand-clay/70 hover:text-brand-coral flex items-center gap-1">
+                <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> 朗讀此格
+              </button>
+              <button onclick="jumpToSingleCard(${idx})" class="text-[11px] font-bold text-brand-coral hover:underline">
+                放大詳閱 ➔
+              </button>
+            </div>
+          </div>
+        `;
+        container.appendChild(panelEl);
+      });
+    }
+
+    // 渲染單頁卡片模式
+    function renderSingleCard() {
+      const data = currentStoryData[currentSceneIndex];
+      document.getElementById('sceneStepBadge').innerText = `${data.title} (${data.step}/${data.total})`;
+      document.getElementById('sceneNarrative').innerText = data.narrative;
+      document.getElementById('sceneDialogue').innerText = data.dialogue;
+      document.getElementById('pageIndicator').innerText = `${data.step} / ${data.total}`;
+      document.getElementById('sceneIllustration').innerHTML = data.svgIllustration;
+
+      document.getElementById('prevBtn').disabled = currentSceneIndex === 0;
+      document.getElementById('nextBtn').innerText = currentSceneIndex === currentStoryData.length - 1 ? "完成閱讀" : "下一格";
+    }
+
+    function toggleComicViewMode() {
+      isComicGridView = !isComicGridView;
+      renderStoryView();
+    }
+
+    function jumpToSingleCard(index) {
+      currentSceneIndex = index;
+      isComicGridView = false;
+      renderStoryView();
+    }
+
+    function prevScene() {
+      if (currentSceneIndex > 0) {
+        currentSceneIndex--;
+        renderSingleCard();
+      }
+    }
+
+    function nextScene() {
+      if (currentSceneIndex < currentStoryData.length - 1) {
+        currentSceneIndex++;
+        renderSingleCard();
+      } else {
+        alert("恭喜完成這段心聲創作！您可以透過下方分享鍵將完整故事或此幕傳給家人。");
+      }
+    }
+
+    function resetStory() {
+      document.getElementById('storyResultContainer').classList.add('hidden');
+      document.getElementById('mediaOptionsContainer').classList.remove('hidden');
+      document.getElementById('actionBtnContainer').classList.remove('hidden');
+      switchInputMode(currentMode);
+    }
+
+    // 手機觸控手勢滑動翻頁
+    function initTouchGestures() {
+      const card = document.getElementById('storyCard');
+      if (!card) return;
+
+      card.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      card.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipeGesture();
+      }, { passive: true });
+    }
+
+    function handleSwipeGesture() {
+      const swipeDistance = touchEndX - touchStartX;
+      if (Math.abs(swipeDistance) > 45) {
+        if (swipeDistance < 0) {
+          nextScene();
+        } else {
+          prevScene();
+        }
+      }
+    }
+
+    // ==================== 升級版分享心聲文字生成邏輯 ====================
+    function getShareContent() {
+      const scope = document.querySelector('input[name="shareScope"]:checked')?.value || 'single';
+      const outline = currentMode === 'guided' 
+        ? (document.getElementById('q1')?.value.trim() || "給家人的溫暖心聲")
+        : (document.getElementById('free_outline')?.value.trim() || "給家人的自由傾訴心聲");
+      
+      const mediaTitle = selectedMediaType === 'comic' ? "家庭多格漫畫" : "心聲繪本微電影";
+
+      if (scope === 'single') {
+        // 分享某一幕心聲
+        const currentScene = currentStoryData[currentSceneIndex] || currentStoryData[0];
+        return `【BridgeStory AI · ${mediaTitle}】\n` +
+               `💌 主題心聲：${outline}\n` +
+               `📌 分享選段：${currentScene.title}\n` +
+               `📖 故事旁白：${currentScene.narrative}\n` +
+               `💬 親子對話：${currentScene.dialogue}\n\n` +
+               `✨ 這是我一直想向你表達的心聲，願我們能給彼此一個溫暖的擁抱！`;
+      } else {
+        // 分享完整故事
+        let fullStoryText = `【BridgeStory AI · 完整${mediaTitle}】\n` +
+                            `💌 主題心聲：${outline}\n` +
+                            `📅 總共篇幅：共 ${currentStoryData.length} 幕 / 格\n` +
+                            `------------------------------------\n`;
+
+        currentStoryData.forEach((scene) => {
+          fullStoryText += `\n${scene.title}\n` +
+                           `• 旁白：${scene.narrative}\n` +
+                           `• 對話：${scene.dialogue}\n`;
+        });
+
+        fullStoryText += `\n------------------------------------\n` +
+                         `✨ 謝謝你願意走進這段心聲。想約你今天坐下來，好好喝杯茶聊聊天！`;
+        return fullStoryText;
+      }
+    }
+
+    function shareToWhatsApp() {
+      const text = encodeURIComponent(getShareContent());
+      window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+    }
+
+    function shareToLine() {
+      const text = encodeURIComponent(getShareContent());
+      window.open(`https://line.me/R/msg/text/?${text}`, '_blank');
+    }
+
+    async function shareViaWebShare() {
+      const shareText = getShareContent();
+      const scope = document.querySelector('input[name="shareScope"]:checked')?.value;
+      const title = scope === 'single' ? 'BridgeStory AI 心聲選段' : 'BridgeStory AI 完整心聲故事';
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: title,
+            text: shareText,
+            url: window.location.href
+          });
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            copyShareText();
+          }
+        }
+      } else {
+        copyShareText();
+      }
+    }
+
+    function copyShareText() {
+      const shareText = getShareContent();
+      navigator.clipboard.writeText(shareText);
+      alert('已複製心聲內容至剪貼簿！您可以直接貼上至任何通訊軟體傳給家人。');
+    }
+
+    function updateSharePreview() {
+      // 觸發重新計算分享文字
+      lucide.createIcons();
+    }
+
+    // 語音朗讀
+    function readAloudCurrentScene() {
+      readAloudSpecificScene(currentSceneIndex);
+    }
+
+    function readAloudSpecificScene(index) {
+      if (!('speechSynthesis' in window)) {
+        alert("抱歉，您的瀏覽器暫不支援語音合成功能。");
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const current = currentStoryData[index];
+      const utter = new SpeechSynthesisUtterance(current.narrative + " " + current.dialogue);
+      utter.lang = 'zh-HK';
+      utter.rate = 0.9;
+      window.speechSynthesis.speak(utter);
+    }
+  </script>
+</body>
+</html>
